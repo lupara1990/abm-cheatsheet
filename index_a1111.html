@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic1111 Stable Diffusion Cheatsheet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --border-color: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent-purple: #a371f7;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-orange: #f0883e;
+            --accent-red: #f85149;
+            --accent-yellow: #d29922;
+            --accent-cyan: #39c5cf;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: var(--bg-tertiary);
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 1.25rem;
+        }
+
+        .icon { font-size: 1.3rem; }
+
+        /* Typography Elements */
+        h3 {
+            color: var(--accent-blue);
+            font-size: 1rem;
+            margin: 1.25rem 0 0.5rem 0;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h3:first-child {
+            margin-top: 0;
+        }
+
+        h4 {
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+            margin: 1rem 0 0.4rem 0;
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        ul, ol {
+            margin-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        li {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Code & Prompts */
+        code {
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85em;
+            color: var(--accent-orange);
+        }
+
+        .prompt-box {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.85rem;
+            color: var(--accent-green);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .copy-hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.75rem 0;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 0.6rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Tags & Badges */
+        .tag {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-right: 0.4rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.3rem;
+        }
+
+        .badge-blue { background: rgba(88, 166, 255, 0.2); color: var(--accent-blue); }
+        .badge-green { background: rgba(63, 185, 80, 0.2); color: var(--accent-green); }
+        .badge-orange { background: rgba(240, 136, 62, 0.2); color: var(--accent-orange); }
+        .badge-purple { background: rgba(163, 113, 247, 0.2); color: var(--accent-purple); }
+        .badge-red { background: rgba(248, 81, 73, 0.2); color: var(--accent-red); }
+        .badge-yellow { background: rgba(210, 153, 34, 0.2); color: var(--accent-yellow); }
+
+        /* Range Slider Visual */
+        .range-visual {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+
+        .range-bar {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .range-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+        }
+
+        /* Settings Grid */
+        .settings-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .settings-row:last-child {
+            border-bottom: none;
+        }
+
+        .setting-name {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .setting-value {
+            color: var(--accent-green);
+            font-family: monospace;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: rgba(163, 113, 247, 0.1);
+            border-left: 3px solid var(--accent-purple);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .highlight-box h4 {
+            margin-top: 0;
+            color: var(--accent-purple);
+        }
+
+        /* Tips Box */
+        .tips-box {
+            background: rgba(63, 185, 80, 0.1);
+            border-left: 3px solid var(--accent-green);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .warning-box {
+            background: rgba(210, 153, 34, 0.1);
+            border-left: 3px solid var(--accent-yellow);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* Keyboard Shortcuts */
+        kbd {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-bottom-width: 2px;
+            border-radius: 4px;
+            padding: 0.15rem 0.4rem;
+            font-family: monospace;
+            font-size: 0.85em;
+            color: var(--text-primary);
+        }
+
+        /* Full Width Sections */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        /* Extension Cards */
+        .extension-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .extension-card h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Sampler Visual */
+        .sampler-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .sampler-item {
+            background: var(--bg-tertiary);
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .sampler-item.fast {
+            border-color: var(--accent-green);
+        }
+
+        .sampler-item.quality {
+            border-color: var(--accent-purple);
+        }
+
+        /* Navigation */
+        .nav-bar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Section Anchors */
+        .section-anchor {
+            scroll-margin-top: 80px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎨 Automatic1111 Stable Diffusion</h1>
+        <p>Complete Cheatsheet | Terminology | Workflows | Midjourney Setup</p>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-links">
+            <a href="#basics">Basics</a>
+            <a href="#terminology">Terminology</a>
+            <a href="#interface">Interface</a>
+            <a href="#samplers">Samplers</a>
+            <a href="#prompting">Prompting</a>
+            <a href="#models">Models</a>
+            <a href="#workflows">Workflows</a>
+            <a href="#midjourney">Midjourney Setup</a>
+            <a href="#extensions">Extensions</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="grid">
+            <!-- Core Concepts -->
+            <div class="card section-anchor" id="basics">
+                <div class="card-header">
+                    <span class="icon">🎯</span>
+                    <h2>Core Concepts</h2>
+                </div>
+                <div class="card-body">
+                    <h3>How Stable Diffusion Works</h3>
+                    <ul>
+                        <li><strong>Diffusion Process:</strong> Model learns to reverse noise into images</li>
+                        <li><strong>Latent Space:</strong> Compressed image representation (smaller than pixels)</li>
+                        <li><strong>Text Encoder:</strong> CLIP converts prompts into embeddings</li>
+                        <li><strong>U-Net:</strong> Neural network that predicts and removes noise</li>
+                        <li><strong>VAE:</strong> Decodes latent representation into final image</li>
+                    </ul>
+
+                    <h3>Generation Process</h3>
+                    <ol>
+                        <li>Text prompt → CLIP embeddings</li>
+                        <li>Random noise in latent space</li>
+                        <li>Iterative denoising (sampling steps)</li>
+                        <li>VAE decodes to image</li>
+                        <li>Output image</li>
+                    </ol>
+
+                    <div class="tips-box">
+                        <h4>💡 Key Insight</h4>
+                        <p style="margin: 0;">Higher steps = more iterations = better quality but slower generation. Diminishing returns after 30-50 steps.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminology -->
+            <div class="card section-anchor" id="terminology">
+                <div class="card-header">
+                    <span class="icon">📚</span>
+                    <h2>Essential Terminology</h2>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr>
+                            <th>Term</th>
+                            <th>Meaning</th>
+                        </tr>
+                        <tr>
+                            <td><code>Checkpoint</code></td>
+                            <td>Main model file (.ckpt/.safetensors). The "brain" of SD.</td>
+                        </tr>
+                        <tr>
+                            <td><code>VAE</code></td>
+                            <td>Variational AutoEncoder. Affects colors/brightness. Usually baked into models now.</td>
+                        </tr>
+                        <tr>
+                            <td><code>LoRA</code></td>
+                            <td>Low-Rank Adaptation. Small addon models for styles, characters, concepts.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Embedding</code></td>
+                            <td>Textual Inversion. Trigger word that represents a concept.</td>
+                        </tr>
+                        <tr>
+                            <td><code>HyperNetwork</code></td>
+                            <td>Older training method. Like LoRA but modifies network structure.</td>
+                        </tr>
+                        <tr>
+                            <td><code>CFG Scale</code></td>
+                            <td>Classifier-Free Guidance. How closely to follow prompt (7-12 typical).</td>
+                        </tr>
+                        <tr>
+                            <td><code>Seed</code></td>
+                            <td>Random number for reproducibility. Same seed + settings = same image.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Resolution</code></td>
+                            <td>Image size. Must be multiples of 8. SD 1.5: 512x512, SDXL: 1024x1024.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Steps</code></td>
+                            <td>Sampling iterations. 20-30 for speed, 30-50 for quality.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Prompt</code></td>
+                            <td>Text description of desired output.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Negative Prompt</code></td>
+                            <td>What to avoid in generation.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Upscale</code></td>
+                            <td>Increase resolution using AI (e.g., ESRGAN, SwinIR).</td>
+                        </tr>
+                        <tr>
+                            <td><code>Inpainting</code></td>
+                            <td>Edit specific parts of an image.</td>
+                        </tr>
+                        <tr>
+                            <td><code>Outpainting</code></td>
+                            <td>Extend image beyond original borders.</td>
+                        </tr>
+                        <tr>
+                            <td><code>ControlNet</code></td>
+                            <td>Extension for precise control (pose, depth, edges).</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Interface Overview -->
+            <div class="card section-anchor" id="interface">
+                <div class="card-header">
+                    <span class="icon">🖥️</span>
+                    <h2>Interface Tabs</h2>
+                </div>
+                <div class="card-body">
+                    <h3>txt2img</h3>
+                    <p>Generate images from text prompts. Main tab for creating from scratch.</p>
+
+                    <h3>img2img</h3>
+                    <p>Transform existing images. Uses image + text prompt as guidance.</p>
+                    <ul>
+                        <li><strong>Denoising Strength:</strong> How much to change (0.0 = same, 1.0 = completely new)</li>
+                        <li><strong>0.3-0.5:</strong> Small variations</li>
+                        <li><strong>0.6-0.75:</strong> Moderate changes</li>
+                        <li><strong>0.75-0.95:</strong> Major changes</li>
+                    </ul>
+
+                    <h3>Inpaint</h3>
+                    <p>Edit specific regions. Paint mask over area to change.</p>
+                    <ul>
+                        <li><strong>Inpaint masked:</strong> Change painted area</li>
+                        <li><strong>Inpaint not masked:</strong> Keep painted area, change rest</li>
+                        <li><strong>Mask blur:</strong> Softness of mask edges (4-12 typical)</li>
+                        <li><strong>Masked content:</strong> Latent noise/fill/original</li>
+                    </ul>
+
+                    <h3>Extras</h3>
+                    <p>Upscale, restore faces, remove backgrounds.</p>
+
+                    <h3>PNG Info</h3>
+                    <p>Extract generation parameters from image metadata.</p>
+
+                    <h3>Checkpoint Merger</h3>
+                    <p>Blend multiple models together.</p>
+
+                    <h3>Train</h3>
+                    <p>Create embeddings, hypernetworks, or prepare datasets.</p>
+                </div>
+            </div>
+
+            <!-- Samplers -->
+            <div class="card section-anchor" id="samplers">
+                <div class="card-header">
+                    <span class="icon">⚡</span>
+                    <h2>Samplers Guide</h2>
+                </div>
+                <div class="card-body">
+                    <h3>Fast Samplers <span class="badge badge-green">Quick</span></h3>
+                    <div class="sampler-grid">
+                        <div class="sampler-item fast">Euler</div>
+                        <div class="sampler-item fast">Euler a</div>
+                        <div class="sampler-item fast">LMS</div>
+                        <div class="sampler-item fast">Heun</div>
+                    </div>
+                    <p style="margin-top: 0.5rem;">Good for: Testing prompts, quick iterations, low step counts (20-25)</p>
+
+                    <h3>Quality Samplers <span class="badge badge-purple">Best</span></h3>
+                    <div class="sampler-grid">
+                        <div class="sampler-item quality">DPM++ 2M Karras</div>
+                        <div class="sampler-item quality">DPM++ SDE Karras</div>
+                        <div class="sampler-item quality">DDIM</div>
+                        <div class="sampler-item quality">UniPC</div>
+                    </div>
+                    <p style="margin-top: 0.5rem;">Good for: Final renders, detailed images, higher steps (25-50)</p>
+
+                    <h3>Sampler Recommendations</h3>
+                    <table>
+                        <tr>
+                            <th>Use Case</th>
+                            <th>Sampler</th>
+                            <th>Steps</th>
+                        </tr>
+                        <tr>
+                            <td>Daily use / Speed</td>
+                            <td>Euler a</td>
+                            <td>20-28</td>
+                        </tr>
+                        <tr>
+                            <td>Best quality</td>
+                            <td>DPM++ 2M Karras</td>
+                            <td>25-35</td>
+                        </tr>
+                        <tr>
+                            <td>SDXL</td>
+                            <td>DPM++ 2M Karras</td>
+                            <td>30-40</td>
+                        </tr>
+                        <tr>
+                            <td>Photorealism</td>
+                            <td>DPM++ SDE Karras</td>
+                            <td>30-50</td>
+                        </tr>
+                        <tr>
+                            <td>Inpainting</td>
+                            <td>Euler a / DDIM</td>
+                            <td>20-30</td>
+                        </tr>
+                    </table>
+
+                    <div class="highlight-box">
+                        <h4>🎨 Pro Tip</h4>
+                        <p style="margin: 0;"><strong>DPM++ 2M Karras</strong> is the current gold standard. Excellent quality at reasonable speeds. <strong>Euler a</strong> is fastest for exploration.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prompting -->
+            <div class="card section-anchor" id="prompting">
+                <div class="card-header">
+                    <span class="icon">✍️</span>
+                    <h2>Prompt Engineering</h2>
+                </div>
+                <div class="card-body">
+                    <h3>Prompt Structure</h3>
+                    <div class="prompt-box">(quality tags), (subject), (action/pose), (clothing), (environment), (lighting), (style), (artist), (technical specs)</div>
+
+                    <h3>Token Priority</h3>
+                    <p>Earlier tokens have more weight. Put most important descriptors first.</p>
+
+                    <h3>Attention Syntax</h3>
+                    <table>
+                        <tr>
+                            <th>Syntax</th>
+                            <th>Effect</th>
+                            <th>Example</th>
+                        </tr>
+                        <tr>
+                            <td><code>(word)</code></td>
+                            <td>1.1x weight</td>
+                            <td><code>(masterpiece)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>((word))</code></td>
+                            <td>1.21x weight (1.1²)</td>
+                            <td><code>((best quality))</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>[word]</code></td>
+                            <td>0.91x weight (reduce)</td>
+                            <td><code>[lowres]</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>(word:1.5)</code></td>
+                            <td>Exact 1.5x weight</td>
+                            <td><code>(detailed:1.3)</code></td>
+                        </tr>
+                        <tr>
+                            <td><code>[word:0.5]</code></td>
+                            <td>Exact 0.5x weight</td>
+                            <td><code>[blurry:0.3]</code></td>
+                        </tr>
+                    </table>
+
+                    <h3>Scheduled Prompting</h3>
+                    <p>Change prompt during generation:</p>
+                    <div class="prompt-box">[from:to:when]
+
+Example: [sunset:dusk:0.3]
+→ Starts with "sunset", switches to "dusk" at 30% of steps
+
+Alternate: [cat|dog:0.5]
+→ Alternates between cat and dog every 0.5 steps</div>
+
+                    <h3>Quality Boosters</h3>
+                    <div class="prompt-box">masterpiece, best quality, highres, absurdres, incredibly absurdres, ultra-detailed, intricate details, professional, 8k uhd, RAW photo</div>
+
+                    <h3>Common Negative Prompts</h3>
+                    <div class="prompt-box">lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, artist name, mutation, deformed, ugly, duplicate, morbid, mutilated, out of frame, disfigured</div>
+
+                    <h3>Style Keywords</h3>
+                    <table>
+                        <tr>
+                            <th>Style</th>
+                            <th>Keywords</th>
+                        </tr>
+                        <tr>
+                            <td>Photorealistic</td>
+                            <td><code>RAW photo, DSLR, film grain, Fujifilm XT3</code></td>
+                        </tr>
+                        <tr>
+                            <td>Anime</td>
+                            <td><code>anime, manga, studio ghibli, cel shading, vibrant</code></td>
+                        </tr>
+                        <tr>
+                            <td>Digital Art</td>
+                            <td><code>digital painting, concept art, artstation, smooth</code></td>
+                        </tr>
+                        <tr>
+                            <td>Oil Painting</td>
+                            <td><code>oil painting, impasto, by greg rutkowski</code></td>
+                        </tr>
+                        <tr>
+                            <td>3D Render</td>
+                            <td><code>octane render, unreal engine 5, 3d, blender</code></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Models -->
+            <div class="card section-anchor" id="models">
+                <div class="card-header">
+                    <span class="icon">🧠</span>
+                    <h2>Models & Resources</h2>
+                </div>
+                <div class="card-body">
+                    <h3>Popular Base Models</h3>
+                    <table>
+                        <tr>
+                            <th>Model</th>
+                            <th>Type</th>
+                            <th>Best For</th>
+                        </tr>
+                        <tr>
+                            <td><strong>SD 1.5</strong></td>
+                            <td>Base</td>
+                            <td>General purpose, most LoRAs</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SDXL 1.0</strong></td>
+                            <td>Base</td>
+                            <td>High quality, 1024px native</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SDXL Lightning</strong></td>
+                            <td>Fast</td>
+                            <td>4-step generation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Realistic Vision</strong></td>
+                            <td>Realism</td>
+                            <td>Photorealistic portraits</td>
+                        </tr>
+                        <tr>
+                            <td><strong>MeinaMix</strong></td>
+                            <td>Anime</td>
+                            <td>Anime illustrations</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DreamShaper</strong></td>
+                            <td>General</td>
+                            <td>All-purpose, stylized</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Juggernaut XL</strong></td>
+                            <td>SDXL</td>
+                            <td>Photorealism, versatility</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Animagine XL</strong></td>
+                            <td>SDXL</td>
+                            <td>Anime on SDXL</td>
+                        </tr>
+                    </table>
+
+                    <h3>Model File Locations</h3>
+                    <ul>
+                        <li><code>models/Stable-diffusion/</code> - Checkpoint models</li>
+                        <li><code>models/VAE/</code> - VAE files</li>
+                        <li><code>models/Lora/</code> - LoRA models</li>
+                        <li><code>embeddings/</code> - Textual inversions</li>
+                        <li><code>models/hypernetworks/</code> - Hypernetworks</li>
+                        <li><code>extensions/sd-webui-controlnet/models/</code> - ControlNet models</li>
+                    </ul>
+
+                    <h3>LoRA Usage</h3>
+                    <div class="prompt-box">&lt;lora:filename:weight&gt;
+
+Example: &lt;lora:add_detail:0.8&gt;
+
+Weight: 0 = off, 1 = full strength
+Typical: 0.6-1.0</div>
+
+                    <h3>Where to Download</h3>
+                    <ul>
+                        <li><strong>Civitai</strong> - Largest model hub</li>
+                        <li><strong>HuggingFace</strong> - Official models</li>
+                        <li><strong>SD Model Place</strong> - Discord community</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Workflows -->
+            <div class="card section-anchor" id="workflows">
+                <div class="card-header">
+                    <span class="icon">🔄</span>
+                    <h2>Common Workflows</h2>
+                </div>
+                <div class="card-body">
+                    <h3>🖼️ Character Portrait</h3>
+                    <ol>
+                        <li>Base model: Realistic Vision / Juggernaut</li>
+                        <li>Resolution: 512x768 (SD 1.5) or 832x1216 (SDXL)</li>
+                        <li>Sampler: DPM++ 2M Karras</li>
+                        <li>Steps: 25-30</li>
+                        <li>CFG: 7-8</li>
+                        <li>Highres fix: 0.5 denoising, 2x upscale</li>
+                    </ol>
+
+                    <h3>🎨 Illustration/Anime</h3>
+                    <ol>
+                        <li>Base model: MeinaMix / Counterfeit / Animagine XL</li>
+                        <li>Resolution: 512x512 or 768x512</li>
+                        <li>Sampler: Euler a</li>
+                        <li>Steps: 28</li>
+                        <li>CFG: 7-9</li>
+                        <li>Add detail LoRA at 0.6-0.8</li>
+                    </ol>
+
+                    <h3>🔄 Img2img Variations</h3>
+                    <ol>
+                        <li>Drop image into img2img</li>
+                        <li>Set denoising: 0.4-0.6</li>
+                        <li>Adjust prompt to desired changes</li>
+                        <li>Keep same seed for consistency</li>
+                        <li>Batch count for variety</li>
+                    </ol>
+
+                    <h3>✏️ Inpainting Workflow</h3>
+                    <ol>
+                        <li>Go to Inpaint tab</li>
+                        <li>Upload image</li>
+                        <li>Paint mask over area to change</li>
+                        <li>Write prompt for replacement</li>
+                        <li>Masked content: "Original" or "Latent noise"</li>
+                        <li>Mask blur: 4-8</li>
+                        <li>Denoising: 0.75-0.95</li>
+                    </ol>
+
+                    <h3>📈 Upscaling Workflow</h3>
+                    <ol>
+                        <li>Generate at native resolution first</li>
+                        <li>Use Hires. fix in txt2img (slower but integrated)</li>
+                        <li>Or use Extras tab (faster, more control)</li>
+                        <li>Upscalers: 4x-UltraSharp, ESRGAN_4x, R-ESRGAN 4x+</li>
+                        <li>For faces: Enable GFPGAN or CodeFormer</li>
+                    </ol>
+
+                    <h3>👤 Face Swap Workflow</h3>
+                    <ol>
+                        <li>Install ReActor or Roop extension</li>
+                        <li>Upload source face in extension panel</li>
+                        <li>Generate with target prompt</li>
+                        <li>Adjust blend strength</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Midjourney Setup -->
+            <div class="card full-width section-anchor" id="midjourney">
+                <div class="card-header">
+                    <span class="icon">🚀</span>
+                    <h2>Midjourney-Like Setup</h2>
+                </div>
+                <div class="card-body">
+                    <p>Configure Automatic1111 to produce Midjourney-style results with minimal prompt engineering.</p>
+
+                    <div class="grid" style="margin-top: 1rem;">
+                        <div>
+                            <h3>Recommended Settings</h3>
+                            <div class="settings-row">
+                                <span class="setting-name">Sampling method</span>
+                                <span class="setting-value">DPM++ 2M Karras</span>
+                            </div>
+                            <div class="settings-row">
+                                <span class="setting-name">Sampling steps</span>
+                                <span class="setting-value">30-40</span>
+                            </div>
+                            <div class="settings-row">
+                                <span class="setting-name">CFG Scale</span>
+                                <span class="setting-value">7-8</span>
+                            </div>
+                            <div class="settings-row">
+                                <span class="setting-name">Resolution (SDXL)</span>
+                                <span class="setting-value">1024x1024</span>
+                            </div>
+                            <div class="settings-row">
+                                <span class="setting-name">Clip skip</span>
+                                <span class="setting-value">2</span>
+                            </div>
+
+                            <h3>Best Models for Midjourney Vibe</h3>
+                            <ul>
+                                <li><strong>Juggernaut XL</strong> - Closest to MJ v6</li>
+                                <li><strong>SDXL Base + Refiner</strong> - Official MJ-style</li>
+                                <li><strong>DreamShaper XL</strong> - Artistic versatility</li>
+                                <li><strong>ProtoVision XL</strong> - Photorealism</li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h3>Midjourney Prompt Translation</h3>
+                            <table>
+                                <tr>
+                                    <th>Midjourney</th>
+                                    <th>Stable Diffusion</th>
+                                </tr>
+                                <tr>
+                                    <td><code>--ar 16:9</code></td>
+                                    <td>Set resolution to 1216x832</td>
+                                </tr>
+                                <tr>
+                                    <td><code>--stylize 250</code></td>
+                                    <td>Increase CFG to 9-12</td>
+                                </tr>
+                                <tr>
+                                    <td><code>--chaos 50</code></td>
+                                    <td>Change seed, use batch</td>
+                                </tr>
+                                <tr>
+                                    <td><code>--niji</code></td>
+                                    <td>Use anime model + style prompts</td>
+                                </tr>
+                                <tr>
+                                    <td><code>--v 6</code></td>
+                                    <td>Use SDXL + specific prompts</td>
+                                </tr>
+                            </table>
+
+                            <h3>Quick Templates</h3>
+                            <div class="prompt-box">// Midjourney V6 Style Portrait
+RAW photo, subject, detailed skin, natural lighting, muted colors, candid, 85mm lens, f/1.8, shallow depth of field
+
+// Midjourney V6 Style Art
+concept art, subject, cinematic composition, dramatic lighting, octane render, unreal engine, highly detailed, 8k</div>
+                        </div>
+                    </div>
+
+                    <h3>Style Presets (Save These!)</h3>
+                    <p>Create styles.txt in A1111 folder with these prompts for quick selection:</p>
+                    <div class="prompt-box">[Midjourney v6 Photoreal]
+RAW photo, subject, detailed skin texture, natural lighting, muted film tones, candid shot, 85mm f/1.8 lens, shallow depth of field, film grain
+
+[Midjourney v6 Artistic]
+concept art, subject, cinematic composition, dramatic volumetric lighting, highly detailed, 8k, trending on artstation, octane render, unreal engine
+
+[Midjourney Niji]
+masterpiece, best quality, anime style, subject, vibrant colors, cel shaded, detailed line art, studio ghibli style</div>
+
+                    <div class="highlight-box">
+                        <h4>⚡ Quick Setup Steps</h4>
+                        <ol style="margin-bottom: 0;">
+                            <li>Download <strong>Juggernaut XL</strong> or <strong>DreamShaper XL</strong></li>
+                            <li>Install <strong>ReActor</strong> extension for face features</li>
+                            <li>Install <strong>Aspect Ratio selector</strong> for quick AR changes</li>
+                            <li>Set default sampler to <strong>DPM++ 2M Karras</strong></li>
+                            <li>Enable <strong>Styles</strong> and save your favorite prompt templates</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extensions -->
+            <div class="card full-width section-anchor" id="extensions">
+                <div class="card-header">
+                    <span class="icon">🔌</span>
+                    <h2>Essential Extensions</h2>
+                </div>
+                <div class="card-body">
+                    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+                        <div class="extension-card">
+                            <h4><span class="badge badge-blue">Must Have</span> ControlNet</h4>
+                            <p>Precise pose, depth, edges control. Download from GitHub: Mikubill/sd-webui-controlnet</p>
+                            <code>Models: OpenPose, Canny, Depth, Lineart, QR Code</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-purple">Quality</span> After Detailer</h4>
+                            <p>Automatic face/body/hand fixing. Works like inpaint for detected regions.</p>
+                            <code>Models: face_yolov8n.pt, hand_yolov8n.pt</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-green">UI</span> Aspect Ratio Selector</h4>
+                            <p>Quick resolution presets. One-click for 16:9, 9:16, 4:3, etc.</p>
+                            <code>Perfect for social media sizes</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-orange">Faces</span> ReActor / Roop</h4>
+                            <p>Face swapping in img2img. Upload source, generate target.</p>
+                            <code>Requires insightface models</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-purple">Prompting</span> Dynamic Prompts</h4>
+                            <p>Wildcard files, random choices, prompt variations.</p>
+                            <code>Syntax: {red|blue|green}</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-blue">Organization</span> Civitai Helper</h4>
+                            <p>Preview images for models, LoRA metadata, model info.</p>
+                            <code>Auto-downloads preview images</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-green">Quality</span> Tiled VAE</h4>
+                            <p>Generate large images without VRAM errors. Essential for high-res.</p>
+                            <code>Settings: 96px tiles, 32px overlap</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-orange">Video</span> AnimateDiff</h4>
+                            <p>Generate animated GIFs/videos from prompts.</p>
+                            <code>Motion modules + prompt travel</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-purple">Tools</span> Inpaint Anything</h4>
+                            <p>Segment anything for precise masking. Click to select objects.</p>
+                            <code>SAM models for object detection</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-blue">Workflow</span> Regional Prompter</h4>
+                            <p>Different prompts for different image regions.</p>
+                            <code>AND syntax for multi-region</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-green">Training</span> Dreambooth</h4>
+                            <p>Train custom models on your images.</p>
+                            <code>Requires 12GB+ VRAM typically</code>
+                        </div>
+
+                        <div class="extension-card">
+                            <h4><span class="badge badge-orange">Organization</span> Tag Autocomplete</h4>
+                            <p>Danbooru tag suggestions as you type.</p>
+                            <code>Essential for anime prompting</code>
+                        </div>
+                    </div>
+
+                    <h3>Installing Extensions</h3>
+                    <ol>
+                        <li>Go to <strong>Extensions</strong> tab → <strong>Install from URL</strong></li>
+                        <li>Paste GitHub repository URL</li>
+                        <li>Click <strong>Install</strong></li>
+                        <li>Go to <strong>Installed</strong> tab → <strong>Apply and restart UI</strong></li>
+                        <li>Some require additional models (check extension docs)</li>
+                    </ol>
+
+                    <div class="warning-box">
+                        <h4>⚠️ Important</h4>
+                        <p style="margin: 0;">After installing extensions, always restart the entire WebUI (not just "Reload UI"). Some extensions need full restart to load dependencies.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Reference -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon">⚙️</span>
+                    <h2>Settings Quick Reference</h2>
+                </div>
+                <div class="card-body">
+                    <h3>Settings → Stable Diffusion</h3>
+                    <div class="settings-row">
+                        <span class="setting-name">Clip skip</span>
+                        <span class="setting-value">2 (for anime) / 1 (for realism)</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="setting-name">Eta noise seed delta</span>
+                        <span class="setting-value">31337 (for some samplers)</span>
+                    </div>
+
+                    <h3>Settings → User Interface</h3>
+                    <div class="settings-row">
+                        <span class="setting-name">Quicksettings list</span>
+                        <span class="setting-value">sd_model_checkpoint, sd_vae, clip_skip</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="setting-name">Show progressbar</span>
+                        <span class="setting-value">Enabled</span>
+                    </div>
+
+                    <h3>Settings → Saving Images</h3>
+                    <div class="settings-row">
+                        <span class="setting-name">Save images</span>
+                        <span class="setting-value">Enabled</span>
+                    </div>
+                    <div class="settings-row">
+                        <span class="setting-name">PNG chunk metadata</span>
+                        <span class="setting-value">Enabled (Full parameters)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon">🔧</span>
+                    <h2>Common Issues</h2>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr>
+                            <th>Problem</th>
+                            <th>Solution</th>
+                        </tr>
+                        <tr>
+                            <td>CUDA out of memory</td>
+                            <td>Enable "Low VRAM mode" in settings. Use --medvram or --lowvram flags</td>
+                        </tr>
+                        <tr>
+                            <td>Black images</td>
+                            <td>Check VAE is loaded. Try FP32 precision in settings</td>
+                        </tr>
+                        <tr>
+                            <td>Green tint</td>
+                            <td>Wrong VAE. Use VAE baked into model or matching VAE</td>
+                        </tr>
+                        <tr>
+                            <td>Blurry faces</td>
+                            <td>Enable After Detailer or use face restoration (GFPGAN/CodeFormer)</td>
+                        </tr>
+                        <tr>
+                            <td>Slow generation</td>
+                            <td>Use xFormers. Enable "Full precision" if on 10xx cards</td>
+                        </tr>
+                        <tr>
+                            <td>Can't load model</td>
+                            <td>Check file isn't corrupted. Ensure enough RAM/VRAM</td>
+                        </tr>
+                        <tr>
+                            <td>NSFW blocked</td>
+                            <td>Disable "Filter NSFW content" in settings</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Launch Flags -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon">🚩</span>
+                    <h2>Launch Flags</h2>
+                </div>
+                <div class="card-body">
+                    <p>Add to <code>webui-user.bat</code> (Windows) or <code>webui-user.sh</code> (Linux):</p>
+
+                    <div class="prompt-box">set COMMANDLINE_ARGS=--xformers --medvram --autolaunch --update-check</div>
+
+                    <h3>Common Flags</h3>
+                    <table>
+                        <tr>
+                            <th>Flag</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td><code>--xformers</code></td>
+                            <td>Faster generation, less VRAM (install first)</td>
+                        </tr>
+                        <tr>
+                            <td><code>--medvram</code></td>
+                            <td>VRAM optimization for 8GB cards</td>
+                        </tr>
+                        <tr>
+                            <td><code>--lowvram</code></td>
+                            <td>For 4GB cards (slower)</td>
+                        </tr>
+                        <tr>
+                            <td><code>--precision full</code></td>
+                            <td>Fixes black images on some GPUs</td>
+                        </tr>
+                        <tr>
+                            <td><code>--no-half</code></td>
+                            <td>Use FP32 instead of FP16</td>
+                        </tr>
+                        <tr>
+                            <td><code>--autolaunch</code></td>
+                            <td>Open browser automatically</td>
+                        </tr>
+                        <tr>
+                            <td><code>--api</code></td>
+                            <td>Enable REST API for external tools</td>
+                        </tr>
+                        <tr>
+                            <td><code>--share</code></td>
+                            <td>Generate public gradio URL</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Keyboard Shortcuts -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="icon">⌨️</span>
+                    <h2>Keyboard Shortcuts</h2>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr>
+                            <th>Shortcut</th>
+                            <th>Action</th>
+                        </tr>
+                        <tr>
+                            <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                            <td>Generate</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Esc</kbd></td>
+                            <td>Interrupt generation</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Alt</kbd> + <kbd>R</kbd></td>
+                            <td>Reuse seed from last generation</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Alt</kbd> + <kbd>←/→</kbd></td>
+                            <td>Previous/Next image in gallery</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Click</kbd> image</td>
+                            <td>Send to img2img, inpaint, extras</td>
+                        </tr>
+                        <tr>
+                            <td><kbd>Send to txt2img</kbd> button</td>
+                            <td>Copy generation parameters</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>🎨 Automatic1111 Stable Diffusion Cheatsheet | For personal reference</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem;">Last updated: April 2026</p>
+    </footer>
+</body>
+</html>
